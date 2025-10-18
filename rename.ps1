@@ -1,21 +1,18 @@
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
-$directory = "Queen\"
+$directory = "E:\Torrents\ACDC\"
 cd $directory
 $mp3_files = Get-ChildItem *.mp3
 
-$band = "Queen"
+$band = "ACDC"
 $string_to_replace = "^\d{2}\.(.*)"
 
 foreach ($file in $mp3_files) {
-    # Extract the number and the rest of the file name
-    if ($file.Name -match $string_to_replace) {
-        $newName = "$($band) -$($matches[1])"
-                
-        # Rename the file
-        Rename-Item $file.Name -NewName $newName
-        Write-Host "Renamed '$($file.Name)' to '$newName'"
-    }
+    $newName = "$($band) - $($file.Name.Substring(4))"
+    
+    Rename-Item $file.Name -NewName $newName
+    Write-Host "Renamed '$($file.Name)' to '$newName'"
+    
 }
 
-cd ..
+cd E:\Lander\Muziek

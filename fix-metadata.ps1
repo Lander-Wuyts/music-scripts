@@ -12,7 +12,7 @@ $mp3_files = Get-ChildItem $directory*.mp3
     # UI
 $bar_length = 50
     # Parameters
-$last_date_modified = "2025-08-23"
+$last_date_modified = "2025-10-18"
 $testing = $false
 
 function Get-ToDoList {
