@@ -8,11 +8,11 @@
 # Variables
     # Files
 $directory = "My playlist\"
-$mp3_files = Get-ChildItem $directory*.mp3
+$mp3_files = Get-ChildItem -Path $directory -Recurse -Filter "*.mp3"
     # UI
 $bar_length = 50
     # Parameters
-$last_date_modified = "2025-11-29"
+$last_date_modified = "2025-12-05"
 $testing = $false
 
 function Get-ToDoList {
