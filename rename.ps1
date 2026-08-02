@@ -17,7 +17,7 @@ for ($i = 0; $i -lt $args.Length; $i++) {
 }
 
 if (!$band) {
-    Write-Host "Set band name with '-b <band name>'"
+    Write-Host "Set band name with '-n <band name>'"
     exit 1
 }
 
