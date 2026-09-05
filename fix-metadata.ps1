@@ -12,7 +12,7 @@ $mp3_files = Get-ChildItem -Path $directory -Recurse -Filter "*.mp3"
     # UI
 $bar_length = 50
     # Parameters
-$last_date_modified = "2026-05-17"
+$last_date_modified = "2026-08-02"
 $testing = $false
 
 function Get-ToDoList {
