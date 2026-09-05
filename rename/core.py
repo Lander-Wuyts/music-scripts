@@ -36,10 +36,6 @@ def plan_renames(directory: Path, band: str, strip: int) -> List[Rename]:
     prefix = f"{band}{SEPARATOR}"
 
     for source in sorted(directory.glob("*.mp3")):
-        if source.name.startswith(prefix):
-            plan.append(Rename(source, skip_reason="already named correctly"))
-            continue
-
         if strip >= len(source.stem):
             plan.append(
                 Rename(source, skip_reason="--strip removes the whole name")

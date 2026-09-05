@@ -9,6 +9,15 @@ from .core import DEFAULT_ROOT, album_directory, apply_renames, plan_renames
 TEST_MODE_BANNER = "######################## Test mode ########################"
 
 
+def directory_argument(value: str) -> Path:
+    """Build a Path from -d, tolerating Windows quoting quirks.
+
+    In `-d "E:\\Folder\\"` the shell treats the final `\\"` as an escaped quote, so the
+    value arrives with a stray `"` glued to the end.
+    """
+    return Path(value.strip().rstrip('"').strip())
+
+
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(
         prog="rename",
@@ -31,7 +40,7 @@ def parse_args(argv=None):
     parser.add_argument(
         "-d",
         "--directory",
-        type=Path,
+        type=directory_argument,
         help=f"folder holding the MP3 files (default: {DEFAULT_ROOT}\\<name>)",
     )
     return parser.parse_args(argv)

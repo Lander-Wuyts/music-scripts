@@ -142,6 +142,11 @@ Windows paths in arguments are fine as-is; quote anything containing spaces:
 python -m rename -n "Arctic Monkeys" -s 3 -d "E:\Torrents\AM (2013)"
 ```
 
+Avoid a trailing backslash inside quotes — `-d "E:\Torrents\Queen\"`. Windows reads the closing
+`\"` as an escaped quote, so the path arrives with a stray `"` on the end. `rename` strips it
+again, but tab completion adds that backslash for you, so it is worth knowing why the path in an
+error message looks odd. A trailing backslash without quotes is harmless.
+
 ## PowerShell scripts
 
 These live in `old_powershell_scripts\` and still need:
