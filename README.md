@@ -4,11 +4,12 @@ Scripts for keeping a local MP3 collection tidy on Windows.
 
 ```
 rename/                    Python package: renames files to the convention
+metadata/                  Python package: writes the tags from the filename
 old_powershell_scripts/    the original PowerShell versions
 ```
 
-The Python port is the way forward; the PowerShell scripts are kept because
-`fix-metadata` has not been ported yet.
+The Python packages are the way forward. The PowerShell scripts are kept because
+`fix-metadata-musix-box.ps1` has not been ported yet.
 
 ## Naming convention
 
@@ -26,8 +27,8 @@ file's ID3 metadata:
 | Artist | everything before the first ` - ` |
 | Title  | everything after the first ` - `, without the `.mp3` extension |
 
-The filename is the source of truth: `rename` fixes the name, then `fix-metadata.ps1` copies the
-name into the tags.
+The filename is the source of truth: `rename` fixes the name, then `metadata` copies the name
+into the tags.
 
 ## `rename`
 
@@ -87,6 +88,43 @@ plan = plan_renames(Path(r"E:\Torrents\Queen"), "Queen", 4)
 apply_renames([entry for entry in plan if not entry.skipped])
 ```
 
+## `metadata`
+
+Replaces `fix-metadata.ps1`. Searches a playlist folder recursively and writes each
+`Artist - Title.mp3` file's artist and title tags from its filename.
+
+```powershell
+python -m metadata [-d <folder>] [--since <yyyy-MM-dd>] [-e]
+```
+
+Run it from the repository root, like `rename`. It needs [mutagen](https://mutagen.readthedocs.io/),
+see [Dependencies](#dependencies).
+
+| Flag | Meaning |
+|------|---------|
+| `-d`, `--directory` | Playlist folder, searched recursively. Defaults to `My playlist` (relative to where you run it). |
+| `--since` | Only look at files modified after this date. Optional, see below. |
+| `-e`, `--execute` | Execute. Without it the script only prints the planned tag changes (test mode). |
+
+```powershell
+python -m metadata                                        # dry run
+python -m metadata -e                                     # write the tags
+python -m metadata -d "D:\Music\My playlist" --since 2026-09-01
+```
+
+The script reads each file's current tags and only writes the ones that differ, so there is no
+`$last_date_modified` to bump after a run: re-running is always safe and only touches new or
+changed files. `--since` just shortens the scan on a big playlist.
+
+The filename is split on the *first* ` - `, so a hyphen inside a name is fine:
+`AC-DC - Back in Black - Live.mp3` gets artist `AC-DC` and title `Back in Black - Live`. Files
+without a ` - ` are skipped with a reason printed. Files with no ID3 tag yet get one.
+
+Exit codes: `0` success, `1` the folder does not exist or holds no MP3s, `2` bad arguments.
+
+The package layout mirrors `rename`: `cli.py` for arguments and output, `core.py` with
+`plan_updates()` and `apply_updates()`.
+
 ## Running the Python scripts on Windows
 
 ### One-time setup
@@ -126,16 +164,12 @@ line comes first — the same one the PowerShell scripts need. It applies to the
 
 ### Dependencies
 
-`rename` needs nothing beyond the standard library, so the venv is optional today — but it gives
-the `fix-metadata` port somewhere to install [mutagen](https://mutagen.readthedocs.io/) later.
-Once a package is needed:
+`rename` needs nothing beyond the standard library. `metadata` needs
+[mutagen](https://mutagen.readthedocs.io/), listed in `requirements.txt`. Install it into the venv:
 
 ```powershell
-.\.venv\Scripts\pip.exe install mutagen
-.\.venv\Scripts\pip.exe freeze > requirements.txt
+.\.venv\Scripts\pip.exe install -r requirements.txt
 ```
-
-On another machine, restore with `.\.venv\Scripts\pip.exe install -r requirements.txt`.
 
 ### Paths
 
@@ -165,7 +199,7 @@ These live in `old_powershell_scripts\` and still need:
 
 ### `fix-metadata.ps1`
 
-Walks a playlist folder recursively and writes the artist and title tags derived from each
+Superseded by `python -m metadata`. Walks a playlist folder recursively and writes the artist and title tags derived from each
 filename. Only files modified *after* `$last_date_modified` are touched, so re-runs stay cheap.
 
 Settings live at the top of the script:
@@ -198,11 +232,10 @@ already correct.
 1. Download an album into `E:\Torrents\<band>\`.
 2. Dry-run `python -m rename -n "<band>" -s <nr>`, verify the output, then re-run with `-e`.
 3. Move the renamed files into the playlist folder.
-4. Run `fix-metadata.ps1`, confirm the file list, and let it write the tags.
-5. Update `$last_date_modified` in `fix-metadata.ps1` to today's date.
+4. Dry-run `python -m metadata`, check the planned tag changes, then re-run with `-e`.
 
 ## Notes
 
-- Both metadata scripts locate the separator with `IndexOf("-")`, i.e. the *first* hyphen in the
-  filename. A hyphen inside the artist name will split the title in the wrong place. The Python
-  `rename` package does not have this problem, as it only ever writes the separator.
+- Both PowerShell metadata scripts locate the separator with `IndexOf("-")`, i.e. the *first*
+  hyphen in the filename. A hyphen inside the artist name will split the title in the wrong place.
+  The Python packages split on ` - ` instead.
