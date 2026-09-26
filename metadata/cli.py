@@ -19,7 +19,7 @@ def date_argument(value: str) -> date:
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(
         prog="metadata",
-        description='Write the artist and title tags of "Artist - Title.mp3" files '
+        description='Write the artist, album artist and title tags of "Artist - Title.mp3" files '
         "from their filenames.",
     )
     parser.add_argument(
@@ -47,6 +47,10 @@ def describe(entry) -> str:
     changes = []
     if entry.artist != entry.current_artist:
         changes.append(f"artist '{entry.current_artist or ''}' ==> '{entry.artist}'")
+    if entry.artist != entry.current_album_artist:
+        changes.append(
+            f"album artist '{entry.current_album_artist or ''}' ==> '{entry.artist}'"
+        )
     if entry.title != entry.current_title:
         changes.append(f"title '{entry.current_title or ''}' ==> '{entry.title}'")
     return ", ".join(changes)

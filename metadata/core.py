@@ -1,4 +1,4 @@
-"""Tag logic: copy "Artist - Title.mp3" filenames into the ID3 artist and title."""
+"""Tag logic: copy "Artist - Title.mp3" filenames into the ID3 artist, album artist and title."""
 
 from dataclasses import dataclass
 from datetime import date
@@ -29,6 +29,7 @@ class TagUpdate:
     title: Optional[str] = None
     current_artist: Optional[str] = None
     current_title: Optional[str] = None
+    current_album_artist: Optional[str] = None
     skip_reason: Optional[str] = None
 
     @property
@@ -41,6 +42,7 @@ class TagUpdate:
             not self.skipped
             and self.artist == self.current_artist
             and self.title == self.current_title
+            and self.artist == self.current_album_artist
         )
 
     @property
@@ -63,16 +65,19 @@ def _load_tags(path: Path) -> EasyID3:
         return EasyID3()
 
 
-def read_tags(path: Path) -> Tuple[Optional[str], Optional[str]]:
+def read_tags(path: Path) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    """Return the artist, title and album artist tags."""
     tags = _load_tags(path)
     artist = tags.get("artist", [None])[0]
     title = tags.get("title", [None])[0]
-    return artist, title
+    album_artist = tags.get("albumartist", [None])[0]
+    return artist, title, album_artist
 
 
 def write_tags(path: Path, artist: str, title: str) -> None:
     tags = _load_tags(path)
     tags["artist"] = artist
+    tags["albumartist"] = artist
     tags["title"] = title
     tags.save(path)
 
@@ -98,13 +103,22 @@ def plan_updates(directory: Path, since: Optional[date] = None) -> List[TagUpdat
             continue
 
         try:
-            current_artist, current_title = read_tags(source)
+            current_artist, current_title, current_album_artist = read_tags(source)
         except MutagenError as error:
             plan.append(TagUpdate(source, skip_reason=f"cannot read tags ({error})"))
             continue
 
         artist, title = parsed
-        plan.append(TagUpdate(source, artist, title, current_artist, current_title))
+        plan.append(
+            TagUpdate(
+                source,
+                artist,
+                title,
+                current_artist,
+                current_title,
+                current_album_artist,
+            )
+        )
 
     return plan
 

@@ -91,7 +91,8 @@ apply_renames([entry for entry in plan if not entry.skipped])
 ## `metadata`
 
 Replaces `fix-metadata.ps1`. Searches a playlist folder recursively and writes each
-`Artist - Title.mp3` file's artist and title tags from its filename.
+`Artist - Title.mp3` file's artist, album artist and title tags from its filename. The artist goes
+into both artist fields: Windows shows them as *Contributing artists* and *Album artist*.
 
 ```powershell
 python -m metadata [-d <folder>] [--since <yyyy-MM-dd>] [-e]
