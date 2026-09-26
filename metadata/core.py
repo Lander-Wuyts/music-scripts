@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 try:
     from mutagen import MutagenError
@@ -18,6 +18,9 @@ except ModuleNotFoundError as error:
 from rename.core import SEPARATOR
 
 DEFAULT_DIRECTORY = Path("My playlist")
+
+# Called as progress(position, total, path) before each file is handled.
+Progress = Callable[[int, int, Path], None]
 
 
 @dataclass(frozen=True)
@@ -82,7 +85,11 @@ def write_tags(path: Path, artist: str, title: str) -> None:
     tags.save(path)
 
 
-def plan_updates(directory: Path, since: Optional[date] = None) -> List[TagUpdate]:
+def plan_updates(
+    directory: Path,
+    since: Optional[date] = None,
+    progress: Optional[Progress] = None,
+) -> List[TagUpdate]:
     """Work out which files need new tags, without writing anything.
 
     Searches `directory` recursively. With `since`, files last modified on or
@@ -90,8 +97,12 @@ def plan_updates(directory: Path, since: Optional[date] = None) -> List[TagUpdat
     tags already match are never rewritten anyway.
     """
     plan = []
+    sources = sorted(directory.rglob("*.mp3"))
 
-    for source in sorted(directory.rglob("*.mp3")):
+    for position, source in enumerate(sources, 1):
+        if progress:
+            progress(position, len(sources), source)
+
         if since and date.fromtimestamp(source.stat().st_mtime) <= since:
             continue
 
@@ -123,13 +134,16 @@ def plan_updates(directory: Path, since: Optional[date] = None) -> List[TagUpdat
     return plan
 
 
-def apply_updates(plan: List[TagUpdate]) -> List[TagUpdate]:
+def apply_updates(
+    plan: List[TagUpdate], progress: Optional[Progress] = None
+) -> List[TagUpdate]:
     """Write the tags of every pending entry in the plan and return those done."""
     done = []
+    pending = [entry for entry in plan if entry.pending]
 
-    for entry in plan:
-        if not entry.pending:
-            continue
+    for position, entry in enumerate(pending, 1):
+        if progress:
+            progress(position, len(pending), entry.source)
         write_tags(entry.source, entry.artist, entry.title)
         done.append(entry)
 

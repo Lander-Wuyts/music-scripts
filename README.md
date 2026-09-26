@@ -117,6 +117,14 @@ The script reads each file's current tags and only writes the ones that differ, 
 `$last_date_modified` to bump after a run: re-running is always safe and only touches new or
 changed files. `--since` just shortens the scan on a big playlist.
 
+While it reads and writes tags, a status line shows the progress and the current file:
+
+```
+Reading [1234/3012] [********            ]  40% Queen\Queen - Bohemian Rhapsody.mp3
+```
+
+It is drawn on stderr and left out when the output is redirected, e.g. `python -m metadata > plan.txt`.
+
 The filename is split on the *first* ` - `, so a hyphen inside a name is fine:
 `AC-DC - Back in Black - Live.mp3` gets artist `AC-DC` and title `Back in Black - Live`. Files
 without a ` - ` are skipped with a reason printed. Files with no ID3 tag yet get one.
