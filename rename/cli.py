@@ -23,23 +23,25 @@ def parse_args(argv=None):
         prog="rename",
         description='Rename an album\'s MP3 files to "Artist - Title.mp3".',
     )
-    parser.add_argument("-n", "--name", required=True, help="band name")
     parser.add_argument(
-        "-s",
-        "--strip",
+        "-n", "--name",
         required=True,
-        type=int,
-        help="number of leading characters to strip from each filename",
+        help="band name"
     )
     parser.add_argument(
-        "-e",
-        "--execute",
+        "-s", "--strip",
+        required=True,
+        type=int,
+        help="number of leading characters to strip from each filename; "
+        "a negative number strips that many trailing characters (the .mp3 is kept)",
+    )
+    parser.add_argument(
+        "-e", "--execute",
         action="store_true",
         help="perform the renames (default is a dry run)",
     )
     parser.add_argument(
-        "-d",
-        "--directory",
+        "-d", "--directory",
         type=directory_argument,
         help=f"folder holding the MP3 files (default: {DEFAULT_ROOT}\\<name>)",
     )
@@ -48,10 +50,6 @@ def parse_args(argv=None):
 
 def main(argv=None) -> int:
     args = parse_args(argv)
-
-    if args.strip < 0:
-        print("--strip must be zero or positive", file=sys.stderr)
-        return 2
 
     directory = album_directory(args.name, args.directory)
     if not directory.is_dir():

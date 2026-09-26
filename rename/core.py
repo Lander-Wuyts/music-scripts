@@ -26,6 +26,10 @@ def album_directory(band: str, directory: Optional[Path] = None) -> Path:
 
 
 def new_name(band: str, file_name: str, strip: int) -> str:
+    """Strip `strip` leading characters, or trailing ones (before the extension) if negative."""
+    if strip < 0:
+        path = Path(file_name)
+        return f"{band}{SEPARATOR}{path.stem[:strip]}{path.suffix}"
     return f"{band}{SEPARATOR}{file_name[strip:]}"
 
 
@@ -36,7 +40,7 @@ def plan_renames(directory: Path, band: str, strip: int) -> List[Rename]:
     prefix = f"{band}{SEPARATOR}"
 
     for source in sorted(directory.glob("*.mp3")):
-        if strip >= len(source.stem):
+        if abs(strip) >= len(source.stem):
             plan.append(
                 Rename(source, skip_reason="--strip removes the whole name")
             )

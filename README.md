@@ -43,15 +43,18 @@ Run it from the repository root, so that `python` can find the `rename` package.
 | Flag | Meaning |
 |------|---------|
 | `-n`, `--name` | Band name. Used as the `Artist` prefix, and as the folder name under the default root. Required. |
-| `-s`, `--strip` | Number of leading characters to strip from each original filename. Required. |
+| `-s`, `--strip` | Number of leading characters to strip from each original filename. A negative number strips that many trailing characters instead, just before `.mp3` (which is kept). Required. |
 | `-e`, `--execute` | Execute. Without it the script only prints the planned renames (test mode). |
 | `-d`, `--directory` | Folder holding the MP3 files. Defaults to `E:\Torrents\<name>`. |
 
 Example: with files named `01. Bohemian Rhapsody.mp3`, `-s 4` strips `01. ` and `-n "Queen"`
 yields `Queen - Bohemian Rhapsody.mp3`.
 
+With `Bohemian Rhapsody [320k].mp3`, `-s -7` strips ` [320k]` from the end instead.
+
 ```powershell
 python -m rename -n "Queen" -s 4                          # dry run
+python -m rename -n "Queen" -s -7                         # strip from the end
 python -m rename -n "Queen" -s 4 -e                       # do it
 python -m rename -n "Arctic Monkeys" -s 3 -d "E:\Torrents\AM (2013)"
 ```
@@ -62,7 +65,7 @@ Files are left alone, with a reason printed, when they already start with `<band
 `--strip` would consume the whole name, or when the new name is already taken. Re-running is
 therefore safe: a file that is already correct is never renamed twice.
 
-Exit codes: `0` success, `1` the folder does not exist or holds no MP3s, `2` bad arguments.
+Exit codes: `0` success, `1` the folder does not exist or holds no MP3s, `2` bad arguments (from argparse).
 
 ### Package layout
 
