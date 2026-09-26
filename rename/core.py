@@ -29,7 +29,7 @@ def new_name(band: str, file_name: str, strip: int) -> str:
     """Strip `strip` leading characters, or trailing ones (before the extension) if negative."""
     if strip < 0:
         path = Path(file_name)
-        return f"{band}{SEPARATOR}{path.stem[:strip]}{path.suffix}"
+        return f"{path.stem[:strip]}{path.suffix}"
     return f"{band}{SEPARATOR}{file_name[strip:]}"
 
 
